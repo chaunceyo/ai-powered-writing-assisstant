@@ -12,7 +12,7 @@ function analyzeText(text) {
         },
         body: JSON.stringify({
             model: "text-davinci-003",
-            prompt: `Check this text for grammatical errors and suggest improvements: ${text}`,
+            prompt: `Correct the grammar and improve the clarity of the following text:\n\n${text}`,
             max_tokens: 100
         })
     })
