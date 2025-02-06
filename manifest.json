@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "AI Writing Assisstant",
+    "description": "Enhance your writing with AI-powered grammar and style suggestions.",
+    "version": "1.0",
+    "permissions": ["activeTab", "storage"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "host_permissions": ["http://*/*", "https://*/*"]
+}
