@@ -1,0 +1,25 @@
+{
+  "name": "ai-powered-writing-assisstant",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaunceyo/ai-powered-writing-assisstant.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chaunceyo/ai-powered-writing-assisstant/issues"
+  },
+  "homepage": "https://github.com/chaunceyo/ai-powered-writing-assisstant#readme",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

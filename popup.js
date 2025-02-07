@@ -1,14 +1,29 @@
+// popup.js
 document.getElementById('checkButton').addEventListener('click', function() {
     let text = document.getElementById('editor').value;
-    analyzeText(text);
+
+    // Retrieve API key from chrome.storage
+    chrome.storage.local.get('apiKey', function(result) {
+        const apiKey = result.apiKey;
+
+        if (!apiKey) {
+            console.error('API key not found!');
+            displaySuggestions("API key is missing.");
+            return;
+        }
+
+        // Send the text to the OpenAI API for grammar correction
+        analyzeText(apiKey, text);
+    });
 });
 
-function analyzeText(text) {
+// Function to make the API request to OpenAI
+function analyzeText(apiKey, text) {
     fetch('https://api.openai.com/v1/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer YOUR_OPENAI_API_KEY`
+            'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
             model: "text-davinci-003",
@@ -18,21 +33,19 @@ function analyzeText(text) {
     })
     .then(res => res.json())
     .then(data => {
-        // Check if 'choices' exists and has at least one item
         if (data.choices && data.choices.length > 0) {
             displaySuggestions(data.choices[0].text);
         } else {
-            // Handle the case where no choices are returned
             displaySuggestions("No suggestions available.");
         }
     })
     .catch(error => {
-        // Handle network errors or API issues
         console.error('Error with the API request:', error);
         displaySuggestions("An error occurred while processing your request.");
     });
 }
 
+// Function to display the response from OpenAI
 function displaySuggestions(suggestions) {
     document.getElementById('suggestions').innerText = suggestions;
 }
