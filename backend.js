@@ -1,20 +1,23 @@
 // backend.js
+
 const express = require('express');
 const axios = require('axios');
-require('dotenv').config();  // Load environment variables from .env file
+require('dotenv').config();  // Loads environment variables from .env file
 
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
-// API endpoint to forward the request to OpenAI
+// API route to handle text analysis requests from Chrome extension
 app.post('/analyze-text', async (req, res) => {
-    const text = req.body.text;
+    const text = req.body.text;  // Get the text sent by the Chrome extension
+
+    if (!text) {
+        return res.status(400).json({ error: 'Text is required.' });
+    }
 
     try {
-        // Make the request to OpenAI API
         const response = await axios.post('https://api.openai.com/v1/completions', {
             model: 'text-davinci-003',
             prompt: `Correct the grammar and improve the clarity of the following text:\n\n${text}`,
@@ -26,15 +29,18 @@ app.post('/analyze-text', async (req, res) => {
             }
         });
 
-        // Send the result back to the client (Chrome extension)
+        // Send the OpenAI response back to the Chrome extension
         res.json(response.data);
     } catch (error) {
-        console.error('Error with the API request:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error with the API request:', error.message);
+        // Send a detailed error message back to the frontend
+        res.status(500).json({
+            error: 'An error occurred while processing your request.',
+            details: error.response ? error.response.data : error.message,
+        });
     }
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

@@ -1,50 +1,34 @@
-// background.js or popup.js
-chrome.storage.local.set({ apiKey: process.env.OPEN_AI_API_KEY }, function() {
-    console.log('API key is saved.');
-});
+// background.js
 
-chrome.storage.local.get('apiKey', function(result) {
-    const apiKey = result.apiKey;
-    if (apiKey) {
-        console.log('API Key:', apiKey);
-        // Now you can use the API key in your fetch request
-    } else {
-        console.error('API key not found!');
+chrome.runtime.onInstalled.addListener(function() {
+    console.log("Chrome Extension Installed");
+  });
+  
+  // Listen for messages from the popup (or content scripts)
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === "analyzeText") {
+      // Forward the request to the backend server
+      fetch('http://localhost:3000/analyze-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: request.text
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Send the backend response back to the popup
+        sendResponse({ suggestions: data });
+      })
+      .catch(error => {
+        console.error('Error with the API request:', error);
+        sendResponse({ error: "An error occurred while processing your request." });
+      });
+  
+      // Return true to indicate we’ll send a response asynchronously
+      return true;
     }
-});
-
-function analyzeText(text) {
-    chrome.storage.local.get('apiKey', function(result) {
-        const apiKey = result.apiKey;
-
-        if (!apiKey) {
-            console.error('API key is not available.');
-            return;
-        }
-
-        fetch('https://api.openai.com/v1/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: "text-davinci-003",
-                prompt: `Correct the grammar and improve the clarity of the following text:\n\n${text}`,
-                max_tokens: 100
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.choices && data.choices.length > 0) {
-                displaySuggestions(data.choices[0].text);
-            } else {
-                displaySuggestions("No suggestions available.");
-            }
-        })
-        .catch(error => {
-            console.error('Error with the API request:', error);
-            displaySuggestions("An error occurred while processing your request.");
-        });
-    });
-}
+  });
+  
